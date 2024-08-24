@@ -26,7 +26,7 @@ Ensure the following are available on your system:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/SaadOps/SafeSquid.git
+   git clone https://github.com/SaadOps/proxy-server-monitoring.git
    cd proxy-server-monitoring
    ```
 
