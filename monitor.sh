@@ -2,7 +2,7 @@
 
 # Function to display usage information
 usage() {
-    echo "Usage: $0 [-cpu] [-memory] [-network] [-disk] [-load] [-process] [-service]"
+    echo "Usage: $0 [-cpu] [-memory] [-network] [-disk] [-load] [-process] [-service] [-squid]"
     exit 1
 }
 
@@ -49,18 +49,10 @@ network_monitoring() {
     fi
     echo ""
 }
-
 # Function to display Disk Usage
 disk_usage() {
     echo "Disk Usage:"
-    warning_count=$(df -h | awk '$5+0 > 80 {print "Warning: " $1 " is using " $5 " of space."}')
-    
-    if [ -n "$warning_count" ]; then
-        echo "$warning_count"
-    else
-        echo "All partitions are using less than 80% of space."
-    fi
-
+    df -h | awk '$5+0 > 80 {print "Warning: " $1 " is using " $5 " of space."}'
     df -h || echo "Error: Failed to retrieve disk usage information."
     echo ""
 }
@@ -98,15 +90,49 @@ process_monitoring() {
 service_monitoring() {
     echo "Service Monitoring:"
     
-    # Get the list of all active services
-    active_services=$(systemctl list-units --type=service --state=running --no-pager --no-legend | awk '{print $1}')
-    
-    if [ -z "$active_services" ]; then
-        echo "No services are currently running."
-    else
-        for service in $active_services; do
+    # List of essential services
+    services=("sshd" "nginx" "apache2" "iptables" "squid")
+    for service in "${services[@]}"; do
+        if systemctl is-active --quiet "$service"; then
             echo "$service is running"
-        done
+        else
+            echo "$service is not running"
+        fi
+    done
+    echo ""
+}
+
+# Function to display Squid Proxy Status
+squid_status() {
+    echo "Squid Proxy Status:"
+    
+    # Check if Squid is running
+    if pgrep -x "squid" > /dev/null; then
+        echo "Squid is running"
+        echo "Squid PID(s):"
+        pgrep squid
+        
+        echo ""
+        echo "Squid Access Logs Summary:"
+        # Replace with the actual path to your Squid access log
+        if [ -f /var/log/squid/access.log ]; then
+            echo "Total Requests:"
+            wc -l /var/log/squid/access.log
+            echo "Last 10 Requests:"
+            tail -n 10 /var/log/squid/access.log
+        else
+            echo "Squid access log not found."
+        fi
+
+        echo ""
+        echo "Squid Cache Statistics:"
+        if command -v squidclient > /dev/null; then
+            squidclient -h localhost mgr:info
+        else
+            echo "squidclient not found, install it to get cache stats."
+        fi
+    else
+        echo "Squid is not running."
     fi
     echo ""
 }
@@ -122,6 +148,7 @@ if [[ $# -eq 0 ]]; then
         memory_usage
         process_monitoring
         service_monitoring
+        squid_status
         sleep 5
     done
 else
@@ -136,6 +163,7 @@ else
                 -load) system_load ;;
                 -process) process_monitoring ;;
                 -service) service_monitoring ;;
+                -squid) squid_status ;;
                 *) usage ;;
             esac
         done
