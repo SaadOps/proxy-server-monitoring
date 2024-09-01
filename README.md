@@ -1,3 +1,4 @@
+Here’s the updated `README.md` with installation instructions for Debian/Ubuntu only:
 
 ---
 
@@ -21,6 +22,8 @@ This Bash script is designed to provide a real-time monitoring dashboard for sys
 Ensure the following are available on your system:
 - Bash shell
 - Standard Linux utilities (`ps`, `ss`, `df`, `top`, `free`, `systemctl`)
+- Squid Proxy Server
+- `squidclient` for cache access
 
 ## Installation
 
@@ -33,6 +36,17 @@ Ensure the following are available on your system:
 2. **Make the script executable:**
    ```bash
    chmod +x monitor.sh
+   ```
+
+3. **Install Squid Proxy Server:**
+   ```bash
+   sudo apt update
+   sudo apt install squid
+   ```
+
+4. **Install `squidclient`:**
+   ```bash
+   sudo apt install squidclient
    ```
 
 ## Usage
@@ -119,3 +133,4 @@ The script is modular, with each monitoring aspect contained in its own function
 - **Dependencies:** Verify that all required utilities are installed.
 - **Network Monitoring:** Ensure the script can identify an active network interface.
 
+---
