@@ -1,4 +1,3 @@
-Here’s the updated `README.md` with installation instructions for Debian/Ubuntu only:
 
 ---
 
